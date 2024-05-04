@@ -17,5 +17,3 @@ RUN pip install --upgrade pip
 WORKDIR /code
 COPY requirements/ /code/
 RUN pip install -r prod.txt
-
-COPY . /code/
