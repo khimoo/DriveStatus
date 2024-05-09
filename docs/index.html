@@ -6,11 +6,9 @@
     <title>Display Screen Based on API Response</title>
 </head>
 <body>
-  {% csrf_token %}
   <div id="true" style="display: none;">使用中</div>
   <div id="false" style="display: none;">使用可能</div>
   <form action="http://57.181.31.103:8000/" method="post" target="cansel">
-    {% csrf_token %}
     <button type="submit" onclick="window.location.reload();"/>切り替え</button>
   </form>
   <iframe name="cansel" style="width:0px;height:0px;border:0px;"></iframe>
