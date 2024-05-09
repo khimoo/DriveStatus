@@ -1,13 +1,22 @@
 <!DOCTYPE html>
-<html lang-"ja">
 
+{% load static %}
+
+<html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>{% block title %} {% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Display Screen Based on API Response</title>
 </head>
-
 <body>
-  home
-</body>
+  {% if is_using %}
+    <h1>使用中</h1>
+  {% else %}
+    <h1>使用可能</h1>
+  {% endif %}
+  <a href="{% url 'api:toggle' %}">切り替え</a>
+  <a href="javascript:location.reload(true);">更新する</a>
 
+  <script type="text/javascript" src="{% static 'js/script.js' %}"></script>
+</body>
 </html>
