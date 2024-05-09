@@ -1,4 +1,4 @@
-fetch('http://57.181.31.103:8000/')
+fetch('https://57.181.31.103:8000/')
   .then(response => response.json())
   .then(data => {
     if(data.is_using) {
