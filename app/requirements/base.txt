@@ -18,3 +18,4 @@ pytest-django
 pytest-cov
 pytest-env
 django-environ
+django-sslserver
