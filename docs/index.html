@@ -6,7 +6,15 @@
     <title>Display Screen Based on API Response</title>
 </head>
 <body>
-  test
+  <div id="true" style="display: none;">使用中</div>
+  <div id="false" style="display: none;">使用可能</div>
+  <form action="http://localhost:8000" method="post" target="cansel">
+    <button type="submit" onclick="window.location.reload();"/>切り替え</button>
+  </form>
+  <iframe name="cansel" style="width:0px;height:0px;border:0px;"></iframe>
+  <button type="submit" onclick="window.location.reload();"/>ページ更新</button>
+  <br>discord<br>
+
+  <script type="text/javascript" src="script.js"></script>
 </body>
 </html>
-
