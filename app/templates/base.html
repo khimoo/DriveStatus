@@ -28,9 +28,7 @@
       {% endif %}
       {% for reservation in reservations %}
       <li>
-        {% timezone "Asia/Tokyo" %}
-        {{ reservation.start_time|date:"m/d" }} ({{ reservation.start_time|date:"D" }}) ~ {{ reservation.end_time|date:"m/d" }} ({{ reservation.end_time|date:"D" }}) 予約したひと:{{ reservation.user }}
-        {% endtimezone %}
+        {{ reservation.start_time|date:"m/d (D)" }}{{ reservation.start_time|time:"G:i" }} ~ {{ reservation.end_time|date:"m/d (D)" }}{{ reservation.end_time|time:"G:i" }} 予約したひと:{{ reservation.user }}
         <form method="post" action="{% url 'api:delete_reservation' reservation.id %}" style="display:inline;">
           {% csrf_token %}
           <input type="password" name="password" placeholder="パスワード" required>

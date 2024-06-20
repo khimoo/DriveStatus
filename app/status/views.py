@@ -6,6 +6,7 @@ from django.core.exceptions import ValidationError
 from django.shortcuts import render
 from django.shortcuts import get_object_or_404
 from django.contrib import messages as message
+from django.utils.timezone import make_aware
 
 from .models import Status, Reservation
 
@@ -43,7 +44,7 @@ class ReservationView(TemplateView):
 
         # Combine start_date and start_time into a single datetime object
         start_datetime_str = f'{start_date}T{start_time}'
-        start_time = parse_datetime(start_datetime_str)
+        start_time = make_aware(parse_datetime(start_datetime_str))
 
         # Calculate end_time based on start_time and duration
         end_time = start_time + datetime.timedelta(minutes=duration)
