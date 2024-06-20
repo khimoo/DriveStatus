@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Reservation Form</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap DateTimePicker CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css" rel="stylesheet">
+    <!-- Bootstrap TimePicker CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-timepicker/0.5.2/css/bootstrap-timepicker.min.css" rel="stylesheet">
+    <!-- Bootstrap DateTimePicker JS -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js"></script>
+    <!-- Bootstrap TimePicker JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-timepicker/0.5.2/js/bootstrap-timepicker.min.js"></script>
+    <script>
+        // Initialize datepicker and timepicker
+        $(document).ready(function() {
+            // Datepicker for Start Date
+            $('#start_date').datepicker({
+                format: 'yyyy-mm-dd',
+                autoclose: true,
+                todayBtn: true,
+                todayHighlight: true,
+            });
+
+            // Timepicker for Start Time
+            $('#start_time').timepicker({
+                showMeridian: false,
+                minuteStep: 30,
+                defaultTime: '00:00'
+            });
+
+            // Duration input
+            $('#duration').on('change', function() {
+                // Ensure duration is in increments of 30 minutes and non-negative
+                let duration = parseInt($(this).val());
+                if (isNaN(duration) || duration < 0) {
+                    duration = 0;
+                } else {
+                    duration = Math.floor(duration / 30) * 30; // Round down to nearest 30 minutes
+                }
+                $(this).val(duration);
+            });
+        });
+    </script>
+</head>
+
+<body>
+    <div class="container">
+        <h2>Reservation Form</h2>
+        {% if error_message %}
+          <p style="color: red;">{{ error_message }}</p>
+        {% endif %}
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="user">ニックネーム(本名だめ)</label>
+                <input type="text" class="form-control" id="user" name="user" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">削除用パスワード</label>
+                <input type="password" class="form-control" id="password" name="password" required>
+            </div>
+
+            <div class="form-group">
+                <label for="start_date">予約日</label>
+                <div class="input-group date">
+                    <input type="text" class="form-control" id="start_date" name="start_date" required>
+                    <div class="input-group-append">
+                        <span class="input-group-text"><i class="fa fa-calendar"></i></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="start_time">使用開始時刻</label>
+                <div class="input-group date">
+                    <input type="text" class="form-control" id="start_time" name="start_time" required>
+                    <div class="input-group-append">
+                        <span class="input-group-text"><i class="fa fa-clock"></i></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="duration">どれくらい使うか(30分刻み)</label>
+                <input type="number" class="form-control" id="duration" name="duration" min="0" step="30" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+    </div>
+</body>
+
+</html>

@@ -1,22 +1,44 @@
 <!DOCTYPE html>
 
 {% load static %}
+{% load tz %}
 
 <html lang="ja">
-<head>
+  <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Display Screen Based on API Response</title>
-</head>
-<body>
-  {% if is_using %}
+    <title>home</title>
+  </head>
+  <body>
+    {% if is_using %}
     <h1>使用中</h1>
-  {% else %}
+    {% else %}
     <h1>使用可能</h1>
-  {% endif %}
-  <a href="{% url 'api:toggle' %}">切り替え</a>
-  <a href="javascript:location.reload(true);">更新する</a>
-  <p>車を使ってるときは使用中にしておいてください</p>
-  {% block content %}{% endblock %}
-</body>
+    {% endif %}
+    <a href="{% url 'api:toggle' %}">切り替え</a>
+    <a href="javascript:location.reload(true);">更新</a>
+    <a href="{% url 'api:reservation' %}">予約</a>
+    <p>車を使ってるときは使用中にしておいてください</p>
+    <h1>予約一覧</h1>
+    <ul>
+      {% if messages %}
+        {% for message in messages %}
+        <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+        {% endfor %}
+      {% endif %}
+      {% for reservation in reservations %}
+      <li>
+        {% timezone "Asia/Tokyo" %}
+        {{ reservation.start_time|date:"m/d" }} ({{ reservation.start_time|date:"D" }}) ~ {{ reservation.end_time|date:"m/d" }} ({{ reservation.end_time|date:"D" }}) 予約したひと:{{ reservation.user }}
+        {% endtimezone %}
+        <form method="post" action="{% url 'api:delete_reservation' reservation.id %}" style="display:inline;">
+          {% csrf_token %}
+          <input type="password" name="password" placeholder="パスワード" required>
+          <button type="submit">削除</button>
+        </form>
+      </li>
+      {% endfor %}
+    </ul>
+    {% block content %}{% endblock %}
+  </body>
 </html>
