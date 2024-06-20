@@ -17,6 +17,7 @@ class CarStatusAPIView(TemplateView):
         context['is_using'] = Status.objects.first().is_using
         return context
 
+
 class StatusToggleView(View):
     def get(self, request, *args, **kwargs):
         status = Status.objects.first()
