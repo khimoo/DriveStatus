@@ -3,18 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Display Screen Based on API Response</title>
+    <title>リダイレクトページ</title>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // リダイレクト先のIPアドレスを指定
+            var targetIp = "http://57.181.31.103";
+
+            // リダイレクトを実行
+            window.location.replace(targetIp);
+        });
+    </script>
 </head>
 <body>
-  <div id="true" style="display: none;">使用中</div>
-  <div id="false" style="display: none;">使用可能</div>
-  <form action="https://57.181.31.103:8000/" method="post" target="cansel">
-    <button type="submit" onclick="window.location.reload();"/>切り替え</button>
-  </form>
-  <iframe name="cansel" style="width:0px;height:0px;border:0px;"></iframe>
-  <button type="submit" onclick="window.location.reload();"/>ページ更新</button>
-  <br>discord<br>
-
-  <script type="text/javascript" src="script.js"></script>
+    <p>リダイレクト中です。お待ちください...</p>
 </body>
 </html>
