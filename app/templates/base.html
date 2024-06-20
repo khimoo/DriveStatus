@@ -16,5 +16,7 @@
   {% endif %}
   <a href="{% url 'api:toggle' %}">切り替え</a>
   <a href="javascript:location.reload(true);">更新する</a>
+  <p>車を使ってるときは使用中にしておいてください</p>
+  {% block content %}{% endblock %}
 </body>
 </html>
