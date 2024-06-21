@@ -7,6 +7,7 @@ from django.shortcuts import render
 from django.shortcuts import get_object_or_404
 from django.contrib import messages as message
 from django.utils.timezone import make_aware
+from django.utils import timezone
 
 from .models import Status, Reservation
 
@@ -21,6 +22,13 @@ class CarStatusView(TemplateView):
         # 現在時刻がend_timeを過ぎている予約を削除
         Reservation.objects.filter(end_time__lt=datetime.datetime.now()).delete()
         context['reservations'] = Reservation.objects.all()
+        # 現在がReservation.start_timeより後、Reservation.end_timeより前の時間ならcontext['is_reserved']をTrueにする
+        for reservation in context['reservations']:
+            if reservation.start_time < timezone.now() < reservation.end_time:
+                context['is_reserved'] = True
+                break
+        else:
+            context['is_reserved'] = False
         return context
 
 

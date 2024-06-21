@@ -15,6 +15,9 @@
     {% else %}
     <h1>使用可能</h1>
     {% endif %}
+    {% if is_reserved %}
+    <h1>予約者あり</h1>
+    {% endif %}
     <a href="{% url 'api:toggle' %}">切り替え</a>
     <a href="javascript:location.reload(true);">更新</a>
     <a href="{% url 'api:reservation' %}">予約</a>
