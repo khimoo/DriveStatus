@@ -35,3 +35,15 @@ class Reservation(models.Model):
     def save(self, *args, **kwargs):
         self.clean()  # 保存前にバリデーションを実行する
         super().save(*args, **kwargs)
+
+# ガソリンをいれてくれた人の名前と金額を記録するモデル
+class Gasoline(models.Model):
+    id = models.AutoField(primary_key=True)
+    user = models.CharField(max_length=100)
+    price = models.IntegerField()
+    comment = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.user} {self.price}円"

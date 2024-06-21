@@ -9,4 +9,5 @@ urlpatterns = [
     path('toggle/', views.StatusToggleView.as_view(), name='toggle'),
     path('reservation/', views.ReservationView.as_view(), name='reservation'),
     path('delete_reservation/<int:pk>/', views.DeleteReservationView.as_view(), name='delete_reservation'),
+    path('gasoline/', views.GasolineView.as_view(), name='gasoline'),
 ]

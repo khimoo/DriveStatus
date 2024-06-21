@@ -22,6 +22,7 @@
     <a href="javascript:location.reload(true);">更新</a>
     <a href="{% url 'api:reservation' %}">予約</a>
     <p>車を使ってるときは使用中にしておいてください</p>
+    <p>給油履歴は<a href="{% url 'api:gasoline' %}">こちら</a>(積極的にいれてくれ!!!)</p>
     <h1>予約一覧</h1>
     <ul>
       {% if messages %}

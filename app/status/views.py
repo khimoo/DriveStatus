@@ -9,7 +9,7 @@ from django.contrib import messages as message
 from django.utils.timezone import make_aware
 from django.utils import timezone
 
-from .models import Status, Reservation
+from .models import Status, Reservation, Gasoline
 
 
 class CarStatusView(TemplateView):
@@ -89,4 +89,26 @@ class DeleteReservationView(View):
         else:
             message.error(request, 'パスワードが違います。')
 
+        return redirect('api:status')
+
+
+# ガソリンを入れたことを報告するビュー
+class GasolineView(TemplateView):
+    template_name = 'gasoline.html'
+
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data(**kwargs)
+        context['gasolines'] = Gasoline.objects.all().order_by('-created_at')
+        return self.render_to_response(context)
+
+    def post(self, request, *args, **kwargs):
+        user = request.POST.get('user')
+        price = request.POST.get('price')
+        comment = request.POST.get('comment')
+        gasoline = Gasoline(
+            user=user,
+            price=price,
+            comment=comment
+        )
+        gasoline.save()
         return redirect('api:status')

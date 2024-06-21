@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gasoline Records</title>
+</head>
+<body>
+    <h1>Gasoline Records</h1>
+
+    <form method="post" action="{% url 'api:gasoline' %}">
+        {% csrf_token %}
+        <label for="user">給油したひと</label>
+        <input type="text" id="user" name="user" required><br>
+
+        <label for="price">かかったお金</label>
+        <input type="number" id="price" name="price" required><br>
+
+        <label for="comment">備考</label>
+        <textarea id="comment" name="comment"></textarea><br>
+
+        <button type="submit">Submit</button>
+    </form>
+
+    <h2>給油履歴</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>給油した人</th>
+                <th>金額</th>
+                <th>備考</th>
+                <th>記入日</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for gasoline in gasolines %}
+                <tr>
+                    <td>{{ gasoline.user }}</td>
+                    <td>{{ gasoline.price }}</td>
+                    <td>{{ gasoline.comment }}</td>
+                    <td>{{ gasoline.created_at }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a href="{% url 'api:status' %}">Home</a>
+</body>
+</html>
