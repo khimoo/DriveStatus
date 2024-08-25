@@ -1,7 +1,7 @@
 services:
   api:
     build: ./app
-    container_name: web_api
+    container_name: drivetracker_web
     command:
       ['bash', '-c', 'python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000']
     volumes:
