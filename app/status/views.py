@@ -1,4 +1,4 @@
-from django.views.generic import View, TemplateView
+from django.views.generic import View, TemplateView, FormView
 from django.shortcuts import redirect
 import datetime
 from django.utils.dateparse import parse_datetime
@@ -8,6 +8,7 @@ from django.shortcuts import get_object_or_404
 from django.contrib import messages as message
 from django.utils.timezone import make_aware
 from django.utils import timezone
+from .forms import ReservationForm
 
 from .models import Status, Reservation, Gasoline
 
@@ -40,42 +41,49 @@ class StatusToggleView(View):
         return redirect('api:status')
 
 
-class ReservationView(TemplateView):
+# class ReservationView(TemplateView):
+#     template_name = 'reservation.html'
+#
+#     def post(self, request, *args, **kwargs):
+#         user = request.POST.get('user')
+#         password = request.POST.get('password')
+#         start_date = request.POST.get('start_date')
+#         start_time = request.POST.get('start_time')
+#         duration = int(request.POST.get('duration', 0))  # Ensure duration is an integer
+#
+#         # Combine start_date and start_time into a single datetime object
+#         start_datetime_str = f'{start_date}T{start_time}'
+#         start_time = make_aware(parse_datetime(start_datetime_str))
+#
+#         # Calculate end_time based on start_time and duration
+#         end_time = start_time + datetime.timedelta(minutes=duration)
+#
+#         try:
+#             # Create Reservation object
+#             reservation = Reservation(
+#                 user=user,
+#                 password=password,
+#                 start_time=start_time,
+#                 end_time=end_time
+#             )
+#             reservation.save()
+#             return redirect('api:status')
+#         except ValidationError as e:
+#             return render(request, self.template_name, {
+#                 'error_message': e.message,  # Pass the error message to the template
+#                 'user': user,
+#                 'password': password,
+#                 'start_date': start_date,
+#                 'start_time': start_time.strftime('%H:%M'),
+#                 'duration': duration,
+#             })
+
+class ReservationView(FormView):
+    form_class = ReservationForm
     template_name = 'reservation.html'
 
     def post(self, request, *args, **kwargs):
-        user = request.POST.get('user')
-        password = request.POST.get('password')
-        start_date = request.POST.get('start_date')
-        start_time = request.POST.get('start_time')
-        duration = int(request.POST.get('duration', 0))  # Ensure duration is an integer
-
-        # Combine start_date and start_time into a single datetime object
-        start_datetime_str = f'{start_date}T{start_time}'
-        start_time = make_aware(parse_datetime(start_datetime_str))
-
-        # Calculate end_time based on start_time and duration
-        end_time = start_time + datetime.timedelta(minutes=duration)
-
-        try:
-            # Create Reservation object
-            reservation = Reservation(
-                user=user,
-                password=password,
-                start_time=start_time,
-                end_time=end_time
-            )
-            reservation.save()
-            return redirect('api:status')
-        except ValidationError as e:
-            return render(request, self.template_name, {
-                'error_message': e.message,  # Pass the error message to the template
-                'user': user,
-                'password': password,
-                'start_date': start_date,
-                'start_time': start_time.strftime('%H:%M'),
-                'duration': duration,
-            })
+        form = ReservationForm(request.POST)
 
 
 class DeleteReservationView(View):
