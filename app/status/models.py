@@ -1,6 +1,5 @@
 from django.db import models
 from django.utils import timezone
-from datetime import timedelta
 from django.core.exceptions import ValidationError
 
 
@@ -18,9 +17,9 @@ class Reservation(models.Model):
     user = models.CharField(max_length=100)
     password = models.CharField(max_length=100)
     start_time = models.DateTimeField(default=timezone.now)
+    end_time = models.DateTimeField(default=timezone.now)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    end_time = models.DateTimeField(default=timezone.now)
 
     def clean(self):
         # 予約が被っているかどうか
@@ -37,6 +36,8 @@ class Reservation(models.Model):
         super().save(*args, **kwargs)
 
 # ガソリンをいれてくれた人の名前と金額を記録するモデル
+
+
 class Gasoline(models.Model):
     id = models.AutoField(primary_key=True)
     user = models.CharField(max_length=100)

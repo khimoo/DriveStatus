@@ -1,13 +1,11 @@
-from django.views.generic import View, TemplateView
+from django.views.generic import View, TemplateView, FormView
 from django.shortcuts import redirect
 import datetime
-from django.utils.dateparse import parse_datetime
-from django.core.exceptions import ValidationError
 from django.shortcuts import render
 from django.shortcuts import get_object_or_404
 from django.contrib import messages as message
-from django.utils.timezone import make_aware
 from django.utils import timezone
+from .forms import ReservationForm
 
 from .models import Status, Reservation, Gasoline
 
@@ -20,7 +18,8 @@ class CarStatusView(TemplateView):
         context = super().get_context_data(*args, **kwargs)
         context['is_using'] = Status.objects.first().is_using
         # 現在時刻がend_timeを過ぎている予約を削除
-        Reservation.objects.filter(end_time__lt=datetime.datetime.now()).delete()
+        Reservation.objects.filter(
+            end_time__lt=datetime.datetime.now()).delete()
         context['reservations'] = Reservation.objects.all()
         # 現在がReservation.start_timeより後、Reservation.end_timeより前の時間ならcontext['is_reserved']をTrueにする
         for reservation in context['reservations']:
@@ -40,42 +39,47 @@ class StatusToggleView(View):
         return redirect('api:status')
 
 
-class ReservationView(TemplateView):
+class ReservationView(FormView):
+    form_class = ReservationForm
     template_name = 'reservation.html'
 
-    def post(self, request, *args, **kwargs):
-        user = request.POST.get('user')
-        password = request.POST.get('password')
-        start_date = request.POST.get('start_date')
-        start_time = request.POST.get('start_time')
-        duration = int(request.POST.get('duration', 0))  # Ensure duration is an integer
-
-        # Combine start_date and start_time into a single datetime object
-        start_datetime_str = f'{start_date}T{start_time}'
-        start_time = make_aware(parse_datetime(start_datetime_str))
-
-        # Calculate end_time based on start_time and duration
-        end_time = start_time + datetime.timedelta(minutes=duration)
-
-        try:
-            # Create Reservation object
-            reservation = Reservation(
-                user=user,
-                password=password,
-                start_time=start_time,
-                end_time=end_time
-            )
-            reservation.save()
-            return redirect('api:status')
-        except ValidationError as e:
-            return render(request, self.template_name, {
-                'error_message': e.message,  # Pass the error message to the template
-                'user': user,
-                'password': password,
-                'start_date': start_date,
-                'start_time': start_time.strftime('%H:%M'),
-                'duration': duration,
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        reservations = Reservation.objects.all()
+        events = []
+        for reservation in reservations:
+            local_start_time = timezone.localtime(reservation.start_time)
+            local_end_time = timezone.localtime(reservation.end_time)
+            events.append({
+                'id': reservation.id,
+                'start_year': int(local_start_time.strftime('%Y')),
+                'start_month': int(local_start_time.strftime('%m')),
+                'start_day': int(local_start_time.strftime('%d')),
+                'start_hour': int(local_start_time.strftime('%H')),
+                'start_minute': int(local_start_time.strftime('%M')),
+                'end_year': int(local_end_time.strftime('%Y')),
+                'end_month': int(local_end_time.strftime('%m')),
+                'end_day': int(local_end_time.strftime('%d')),
+                'end_hour': int(local_end_time.strftime('%H')),
+                'end_minute': int(local_end_time.strftime('%M')),
+                'title': reservation.user,
             })
+        context['events'] = events
+        return context
+
+    def post(self, request, *args, **kwargs):
+        form = ReservationForm(data=request.POST)
+        if form.is_valid():
+            # formの内容をReservationモデルに保存
+            Reservation.objects.create(
+                user=form.cleaned_data['name'],
+                password=form.cleaned_data['password'],
+                start_time=form.cleaned_data['start_date'],
+                end_time=form.cleaned_data['end_date']
+            )
+            return redirect('api:status')
+        else:
+            return render(request, self.template_name, {'form': form})
 
 
 class DeleteReservationView(View):
