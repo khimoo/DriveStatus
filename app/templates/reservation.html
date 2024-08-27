@@ -20,8 +20,16 @@
           {{ form.name }}
         </div>
         <div class="form-group">
-          <label for="{{ form.start_date.id_for_label }}">開始日:</label>
+          <label for="{{ form.password.id_for_label }}">削除用パスワード:</label>
+          {{ form.password }}
+        </div>
+        <div class="form-group">
+          <label for="{{ form.start_date.id_for_label }}">開始日時:</label>
           {{ form.start_date }}
+        </div>
+        <div class="form-group">
+          <label for="{{ form.end_date.id_for_label }}">終了日時:</label>
+          {{ form.end_date }}
         </div>
         <button type="submit" class="btn btn-primary">Submit</button>
       </form>
@@ -31,38 +39,35 @@
     <script src="https://cdn.jsdelivr.net/npm/@event-calendar/build@1.5.0/event-calendar.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.9/dayjs.min.js"></script>
     <script>
-      function createDate(hours, minutes) {
+      function createDate(Y, M, D, h, m) {
         const now = new Date();
-        now.setHours(hours);
-        now.setMinutes(minutes);
+        now.setFullYear(Y);
+        now.setMonth(M - 1);
+        now.setDate(D);
+        now.setHours(h);
+        now.setMinutes(m);
         now.setSeconds(0);
         return now;
       }
 
-      const events = [{
-        id: 1,
-        start: createDate(9, 0),
-        end: createDate(10, 30),
-        title: 'Editable Event',
-        editable: true,
-      }, {
-        id: 2,
-        start: createDate(11, 0),
-        end: createDate(13, 30),
-        title: 'Uneditable Event',
-        // editable: false, // not work
+      const events = [];
+      {% for event in events %}
+      events.push({
+        id: {{ forloop.counter }},
+        start: createDate({{ event.start_year }}, {{ event.start_month }}, {{ event.start_day }}, {{ event.start_hour }}, {{ event.start_minute }}),
+        end: createDate({{ event.end_year }}, {{ event.end_month }}, {{ event.end_day }}, {{ event.end_hour }}, {{ event.end_minute }}),
+        title: '{{ event.title }}',
         startEditable: false,
-        durationEditable: false,
+        durationEditable : false,
         backgroundColor: 'red',
-      }];
+      });
+      {% endfor %}
 
-      // 初期イベント数
+    // 初期イベント数
       const initialEventCount = events.length;
 
       function getOverlappingEvents(event) {
-        // select event has event.resource.id
-        // eventDrop event has event.resourceIds
-        // ただし、対象とするイベントは初期イベント数のみ
+        // 対象とするイベントは初期イベント数のみ
         return ec.getEvents().filter(e => e.id != event.id && e.id <= initialEventCount && e.start < event.end && e.end > event.start);
       }
 
@@ -73,17 +78,26 @@
       function hasOtherOverlappingEvents(event) {
         return getOverlappingEvents(event).filter(e => e.id != event.id).length > 0
       }
+      const view = 'timeGridWeek';
+      const views = {
+        timeGridWeek: {
+          type: 'timeGridWeek',
+          duration: { days: 4 },
+          buttonText: 'Week',
+        },
+      };
+
       const ec = new EventCalendar(document.getElementById('ec'), {
         events,
-        view: 'timeGridWeek',
-        //        allDaySlot: false,
-        //        slotMinTime: '08:00:00',
-        //        slotMaxTime: '19:00:00',
+        headerToolbar: {
+          start: 'prev',
+          center: 'title',
+          end: 'next',
+        },
+        view,
+        views,
         nowIndicator: true,
         selectable: true,
-        //        select: function(event) {
-        //          addEvent(event);
-        //        }
         select: function(event) {
           if (hasOverlappingEvents(event)) {
             ec.unselect();
@@ -92,10 +106,22 @@
           addEvent(event);
         },
         eventDrop: function ({ event, revert }) {
-          if (hasOtherOverlappingEvents(event)) revert();
+          if (hasOtherOverlappingEvents(event)) {
+            revert();
+          } else {
+            // formに日時をセット
+            document.getElementById('start_date').value = dayjs(event.start).format('YYYY-MM-DD HH:mm');
+            document.getElementById('end_date').value = dayjs(event.end).format('YYYY-MM-DD HH:mm');
+          }
         },
         eventResize: function ({ event, revert }) {
-          if (hasOtherOverlappingEvents(event)) revert();
+          if (hasOtherOverlappingEvents(event)) {
+            revert();
+        } else {
+          // formに日時をセット
+          document.getElementById('start_date').value = dayjs(event.start).format('YYYY-MM-DD HH:mm');
+          document.getElementById('end_date').value = dayjs(event.end).format('YYYY-MM-DD HH:mm');
+          }
         },
       });
       function addEvent(event) {
@@ -108,6 +134,9 @@
           currentEventId = ec.getEvents()[currentEventCount - 2].id;
           ec.removeEventById(currentEventId);
         }
+        // formに日時をセット
+        document.getElementById('start_date').value = dayjs(event.start).format('YYYY-MM-DD HH:mm');
+        document.getElementById('end_date').value = dayjs(event.end).format('YYYY-MM-DD HH:mm');
       }
     </script>
   </body>
