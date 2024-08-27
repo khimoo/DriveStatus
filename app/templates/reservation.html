@@ -63,7 +63,7 @@
       });
       {% endfor %}
 
-    // 初期イベント数
+      // 初期イベント数
       const initialEventCount = events.length;
 
       function getOverlappingEvents(event) {
@@ -98,6 +98,7 @@
         views,
         nowIndicator: true,
         selectable: true,
+        longPressDelay: 200,
         select: function(event) {
           if (hasOverlappingEvents(event)) {
             ec.unselect();
@@ -117,10 +118,10 @@
         eventResize: function ({ event, revert }) {
           if (hasOtherOverlappingEvents(event)) {
             revert();
-        } else {
-          // formに日時をセット
-          document.getElementById('start_date').value = dayjs(event.start).format('YYYY-MM-DD HH:mm');
-          document.getElementById('end_date').value = dayjs(event.end).format('YYYY-MM-DD HH:mm');
+          } else {
+            // formに日時をセット
+            document.getElementById('start_date').value = dayjs(event.start).format('YYYY-MM-DD HH:mm');
+            document.getElementById('end_date').value = dayjs(event.end).format('YYYY-MM-DD HH:mm');
           }
         },
       });
