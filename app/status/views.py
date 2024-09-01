@@ -1,13 +1,13 @@
 from django.views.generic import View, TemplateView, FormView
 from django.shortcuts import redirect
-import datetime
 from django.shortcuts import render
 from django.shortcuts import get_object_or_404
 from django.contrib import messages as message
 from django.utils import timezone
+import json
 from .forms import ReservationForm
 
-from .models import Status, Reservation, Gasoline
+from .models import Status, Reservation, Gasoline, InsuranceContributer
 
 
 class CarStatusView(TemplateView):
@@ -19,8 +19,15 @@ class CarStatusView(TemplateView):
         context['is_using'] = Status.objects.first().is_using
         # 現在時刻がend_timeを過ぎている予約を削除
         Reservation.objects.filter(
-            end_time__lt=datetime.datetime.now()).delete()
+            end_time__lt=timezone.now()).delete()
         context['reservations'] = Reservation.objects.all()
+
+        insurance_contributers = InsuranceContributer.objects.all()
+        contributers_data = list(insurance_contributers.values('name', 'total_paid'))
+        context['insurance_contributers'] = json.dumps(contributers_data)
+        print(context['insurance_contributers'])
+
+
         # 現在がReservation.start_timeより後、Reservation.end_timeより前の時間ならcontext['is_reserved']をTrueにする
         for reservation in context['reservations']:
             if reservation.start_time < timezone.now() < reservation.end_time:
