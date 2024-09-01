@@ -24,7 +24,6 @@ class CarStatusView(LoginRequiredMixin, TemplateView):
         insurance_contributers = InsuranceContributer.objects.all()
         contributers_data = list(insurance_contributers.values("name", "total_paid"))
         context["insurance_contributers"] = json.dumps(contributers_data)
-        print(context["insurance_contributers"])
 
         # 現在がReservation.start_timeより後、Reservation.end_timeより前の時間ならcontext['is_reserved']をTrueにする
         for reservation in context["reservations"]:
