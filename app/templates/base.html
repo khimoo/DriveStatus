@@ -7,40 +7,24 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% block extra_head %}{% endblock %}
     <title>home</title>
   </head>
   <body>
-    {% if is_using %}
-    <h1>使用中</h1>
-    {% else %}
-    <h1>使用可能</h1>
-    {% endif %}
-    {% if is_reserved %}
-    <h1>予約者あり</h1>
-    {% endif %}
-    <a href="{% url 'api:toggle' %}">切り替え</a>
-    <a href="javascript:location.reload(true);">更新</a>
-    <a href="{% url 'api:reservation' %}">予約</a>
-    <p>車を使ってるときは使用中にしておいてください</p>
-    <p>給油履歴は<a href="{% url 'api:gasoline' %}">こちら</a>(積極的にいれてくれ!!!)</p>
-    <h1>予約一覧</h1>
-    <ul>
-      {% if messages %}
-        {% for message in messages %}
-        <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-        {% endfor %}
-      {% endif %}
-      {% for reservation in reservations %}
-      <li>
-        {{ reservation.start_time|date:"m/d (D)" }}{{ reservation.start_time|time:"G:i" }} ~ {{ reservation.end_time|date:"m/d (D)" }}{{ reservation.end_time|time:"G:i" }} 予約したひと:{{ reservation.user }}
-        <form method="post" action="{% url 'api:delete_reservation' reservation.id %}" style="display:inline;">
-          {% csrf_token %}
-          <input type="password" name="password" placeholder="パスワード" required>
-          <button type="submit">削除</button>
-        </form>
-      </li>
-      {% endfor %}
-    </ul>
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+      <div style="display: flex; align-items: center;">
+        <p style="margin: 0; padding-right: 10px;">ただ今</p>
+        {% if is_using %}
+        <h1 style="margin: 0;">使用中</h1>
+        {% else %}
+        <h1 style="margin: 0;">使用可能</h1>
+        {% endif %}
+      </div>
+      <div>
+        <a href="{% url 'status:home' %}">ホーム</a>
+      </div>
+    </div>
+    <br>
     {% block content %}{% endblock %}
   </body>
 </html>

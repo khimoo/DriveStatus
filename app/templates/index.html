@@ -1,6 +1,71 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h1>掲示板</h1>
-    <p>html形式で掲示事項を入力してください</p>
+<a href="{% url 'status:toggle' %}">切り替え</a>
+<a href="javascript:location.reload(true);">更新</a>
+<a href="{% url 'status:reservation' %}">予約</a>
+<p>車を使ってるときは使用中にしておいてください</p>
+<p>給油履歴<a href="{% url 'status:gasoline' %}">こちら</a>(積極的にいれてくれ!!!)</p>
+<h1 style="display:inline;">予約一覧</h1>
+{% if is_reserved %}
+<h1 style="display:inline;">
+  <span style="margin-left: 5px;">(予約者あり)</span>
+</h1>
+{% endif %}
+<ul>
+  {% if messages %}
+  {% for message in messages %}
+  <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+  {% endfor %}
+  {% endif %}
+  {% for reservation in reservations %}
+  <li>
+    {{ reservation.start_time|date:"m/d (D)" }}{{ reservation.start_time|time:"G:i" }} ~ {{ reservation.end_time|date:"m/d (D)" }}{{ reservation.end_time|time:"G:i" }} 予約したひと:{{ reservation.user }}
+    <form method="post" action="{% url 'status:delete_reservation' reservation.id %}" style="display:inline;">
+      {% csrf_token %}
+      <input type="password" name="password" placeholder="パスワード" required>
+      <button type="submit">削除</button>
+    </form>
+  </li>
+  {% endfor %}
+</ul>
+<h1>保険料支払い状況</h1>
+<div>
+  <canvas id="myChart"></canvas>
+</div>
+<p>2024年6月分から月12270円</p>
+<p>支払い状況が更新されてないときは連絡してください</p>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const contributers = JSON.parse('{{ insurance_contributers|safe }}');
+  console.log(contributers);
+
+  const labels = contributers.map(item => item.name); // nameフィールドをラベルに使用
+  const data = contributers.map(item => item.total_paid); // total_paidフィールドをデータに使用
+
+  const ctx = document.getElementById('myChart');
+
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: '保険料支払い額 (円)',
+        data: data,
+        borderWidth: 1
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      scales: {
+        x: {
+          beginAtZero: true
+        }
+      }
+    }
+  });
+</script>
+<h1>掲示板</h1>
+<p>html形式で掲示事項を入力してください</p>
 {% endblock %}

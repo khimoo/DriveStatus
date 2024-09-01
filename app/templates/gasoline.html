@@ -1,14 +1,6 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gasoline Records</title>
-</head>
-<body>
-    <h1>Gasoline Records</h1>
-
-    <form method="post" action="{% url 'api:gasoline' %}">
+{% extends "base.html" %}
+{% block content %}
+    <form method="post" action="{% url 'status:gasoline' %}">
         {% csrf_token %}
         <label for="user">給油したひと</label>
         <input type="text" id="user" name="user" required><br>
@@ -35,7 +27,7 @@
         <tbody>
             {% for gasoline in gasolines %}
                 <tr>
-                    <td>{{ gasoline.user }}</td>
+                    <td>{{ gasoline.name }}</td>
                     <td>{{ gasoline.price }}</td>
                     <td>{{ gasoline.comment }}</td>
                     <td>{{ gasoline.created_at }}</td>
@@ -43,6 +35,5 @@
             {% endfor %}
         </tbody>
     </table>
-    <a href="{% url 'api:status' %}">Home</a>
-</body>
-</html>
+    <a href="{% url 'status:home' %}">Home</a>
+{% endblock %}
