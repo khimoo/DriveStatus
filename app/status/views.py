@@ -41,7 +41,7 @@ class StatusToggleView(LoginRequiredMixin, View):
         status = Status.objects.first()
         status.is_using = not status.is_using
         status.save()
-        return redirect("api:status")
+        return redirect("status:home")
 
 
 class ReservationView(LoginRequiredMixin, FormView):
@@ -68,7 +68,7 @@ class ReservationView(LoginRequiredMixin, FormView):
                     "end_day": int(local_end_time.strftime("%d")),
                     "end_hour": int(local_end_time.strftime("%H")),
                     "end_minute": int(local_end_time.strftime("%M")),
-                    "title": reservation.user,
+                    "title": reservation.name,
                 }
             )
         context["events"] = events
@@ -79,12 +79,12 @@ class ReservationView(LoginRequiredMixin, FormView):
         if form.is_valid():
             # formの内容をReservationモデルに保存
             Reservation.objects.create(
-                user=form.cleaned_data["name"],
+                name=form.cleaned_data["name"],
                 password=form.cleaned_data["password"],
                 start_time=form.cleaned_data["start_date"],
                 end_time=form.cleaned_data["end_date"],
             )
-            return redirect("api:status")
+            return redirect("status:home")
         else:
             return render(request, self.template_name, {"form": form})
 
@@ -100,7 +100,7 @@ class DeleteReservationView(LoginRequiredMixin, View):
         else:
             message.error(request, "パスワードが違います。")
 
-        return redirect("api:status")
+        return redirect("status:home")
 
 
 # ガソリンを入れたことを報告するビュー
@@ -116,6 +116,6 @@ class GasolineView(LoginRequiredMixin, TemplateView):
         user = request.POST.get("user")
         price = request.POST.get("price")
         comment = request.POST.get("comment")
-        gasoline = Gasoline(user=user, price=price, comment=comment)
+        gasoline = Gasoline(name=user, price=price, comment=comment)
         gasoline.save()
-        return redirect("api:status")
+        return redirect("status:home")
