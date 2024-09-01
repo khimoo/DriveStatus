@@ -1,5 +1,11 @@
-from django.views.generic import TemplateView
+from django.contrib.auth.views import LoginView
+
+from .forms import CustomLoginForm
 
 # 基本共用の一つのユーザーをみんなで使う
-class LoginView(TemplateView):
-    template_name = 'login.html'
+
+
+class LoginView(LoginView):
+    template_name = "login.html"
+    form_class = CustomLoginForm
+    redirect_authenticated_user = True

@@ -1,54 +1,52 @@
-from django.views.generic import View, TemplateView, FormView
-from django.shortcuts import redirect
-from django.shortcuts import render
-from django.shortcuts import get_object_or_404
-from django.contrib import messages as message
-from django.utils import timezone
 import json
+
+from django.contrib import messages as message
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
+from django.views.generic import FormView, TemplateView, View
+
 from .forms import ReservationForm
+from .models import Gasoline, InsuranceContributer, Reservation, Status
 
-from .models import Status, Reservation, Gasoline, InsuranceContributer
 
+class CarStatusView(LoginRequiredMixin, TemplateView):
 
-class CarStatusView(TemplateView):
-
-    template_name = 'index.html'
+    template_name = "index.html"
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
-        context['is_using'] = Status.objects.first().is_using
+        context["is_using"] = Status.objects.first().is_using
         # 現在時刻がend_timeを過ぎている予約を削除
-        Reservation.objects.filter(
-            end_time__lt=timezone.now()).delete()
-        context['reservations'] = Reservation.objects.all()
+        Reservation.objects.filter(end_time__lt=timezone.now()).delete()
+        context["reservations"] = Reservation.objects.all()
 
         insurance_contributers = InsuranceContributer.objects.all()
-        contributers_data = list(insurance_contributers.values('name', 'total_paid'))
-        context['insurance_contributers'] = json.dumps(contributers_data)
-        print(context['insurance_contributers'])
-
+        contributers_data = list(insurance_contributers.values("name", "total_paid"))
+        context["insurance_contributers"] = json.dumps(contributers_data)
+        print(context["insurance_contributers"])
 
         # 現在がReservation.start_timeより後、Reservation.end_timeより前の時間ならcontext['is_reserved']をTrueにする
-        for reservation in context['reservations']:
+        for reservation in context["reservations"]:
             if reservation.start_time < timezone.now() < reservation.end_time:
-                context['is_reserved'] = True
+                context["is_reserved"] = True
                 break
         else:
-            context['is_reserved'] = False
+            context["is_reserved"] = False
         return context
 
 
-class StatusToggleView(View):
+class StatusToggleView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         status = Status.objects.first()
         status.is_using = not status.is_using
         status.save()
-        return redirect('api:status')
+        return redirect("api:status")
 
 
-class ReservationView(FormView):
+class ReservationView(LoginRequiredMixin, FormView):
     form_class = ReservationForm
-    template_name = 'reservation.html'
+    template_name = "reservation.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -57,21 +55,23 @@ class ReservationView(FormView):
         for reservation in reservations:
             local_start_time = timezone.localtime(reservation.start_time)
             local_end_time = timezone.localtime(reservation.end_time)
-            events.append({
-                'id': reservation.id,
-                'start_year': int(local_start_time.strftime('%Y')),
-                'start_month': int(local_start_time.strftime('%m')),
-                'start_day': int(local_start_time.strftime('%d')),
-                'start_hour': int(local_start_time.strftime('%H')),
-                'start_minute': int(local_start_time.strftime('%M')),
-                'end_year': int(local_end_time.strftime('%Y')),
-                'end_month': int(local_end_time.strftime('%m')),
-                'end_day': int(local_end_time.strftime('%d')),
-                'end_hour': int(local_end_time.strftime('%H')),
-                'end_minute': int(local_end_time.strftime('%M')),
-                'title': reservation.user,
-            })
-        context['events'] = events
+            events.append(
+                {
+                    "id": reservation.id,
+                    "start_year": int(local_start_time.strftime("%Y")),
+                    "start_month": int(local_start_time.strftime("%m")),
+                    "start_day": int(local_start_time.strftime("%d")),
+                    "start_hour": int(local_start_time.strftime("%H")),
+                    "start_minute": int(local_start_time.strftime("%M")),
+                    "end_year": int(local_end_time.strftime("%Y")),
+                    "end_month": int(local_end_time.strftime("%m")),
+                    "end_day": int(local_end_time.strftime("%d")),
+                    "end_hour": int(local_end_time.strftime("%H")),
+                    "end_minute": int(local_end_time.strftime("%M")),
+                    "title": reservation.user,
+                }
+            )
+        context["events"] = events
         return context
 
     def post(self, request, *args, **kwargs):
@@ -79,47 +79,43 @@ class ReservationView(FormView):
         if form.is_valid():
             # formの内容をReservationモデルに保存
             Reservation.objects.create(
-                user=form.cleaned_data['name'],
-                password=form.cleaned_data['password'],
-                start_time=form.cleaned_data['start_date'],
-                end_time=form.cleaned_data['end_date']
+                user=form.cleaned_data["name"],
+                password=form.cleaned_data["password"],
+                start_time=form.cleaned_data["start_date"],
+                end_time=form.cleaned_data["end_date"],
             )
-            return redirect('api:status')
+            return redirect("api:status")
         else:
-            return render(request, self.template_name, {'form': form})
+            return render(request, self.template_name, {"form": form})
 
 
-class DeleteReservationView(View):
+class DeleteReservationView(LoginRequiredMixin, View):
     def post(self, request, *args, **kwargs):
-        reservation = get_object_or_404(Reservation, pk=kwargs['pk'])
-        password = request.POST.get('password')
+        reservation = get_object_or_404(Reservation, pk=kwargs["pk"])
+        password = request.POST.get("password")
 
         if password == reservation.password:
             reservation.delete()
-            message.success(request, '予約を削除しました。')
+            message.success(request, "予約を削除しました。")
         else:
-            message.error(request, 'パスワードが違います。')
+            message.error(request, "パスワードが違います。")
 
-        return redirect('api:status')
+        return redirect("api:status")
 
 
 # ガソリンを入れたことを報告するビュー
-class GasolineView(TemplateView):
-    template_name = 'gasoline.html'
+class GasolineView(LoginRequiredMixin, TemplateView):
+    template_name = "gasoline.html"
 
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)
-        context['gasolines'] = Gasoline.objects.all().order_by('-created_at')
+        context["gasolines"] = Gasoline.objects.all().order_by("-created_at")
         return self.render_to_response(context)
 
     def post(self, request, *args, **kwargs):
-        user = request.POST.get('user')
-        price = request.POST.get('price')
-        comment = request.POST.get('comment')
-        gasoline = Gasoline(
-            user=user,
-            price=price,
-            comment=comment
-        )
+        user = request.POST.get("user")
+        price = request.POST.get("price")
+        comment = request.POST.get("comment")
+        gasoline = Gasoline(user=user, price=price, comment=comment)
         gasoline.save()
-        return redirect('api:status')
+        return redirect("api:status")

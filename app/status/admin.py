@@ -1,5 +1,7 @@
 from django.contrib import admin
-from .models import Status, Reservation, Gasoline, InsuranceContributer, InsurancePayment
+
+from .models import (Gasoline, InsuranceContributer, InsurancePayment,
+                     Reservation, Status)
 
 admin.site.register(Status)
 admin.site.register(Reservation)

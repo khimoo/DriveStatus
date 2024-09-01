@@ -18,11 +18,11 @@
     {% if is_reserved %}
     <h1>予約者あり</h1>
     {% endif %}
-    <a href="{% url 'api:toggle' %}">切り替え</a>
+    <a href="{% url 'status:toggle' %}">切り替え</a>
     <a href="javascript:location.reload(true);">更新</a>
-    <a href="{% url 'api:reservation' %}">予約</a>
+    <a href="{% url 'status:reservation' %}">予約</a>
     <p>車を使ってるときは使用中にしておいてください</p>
-    <p>給油履歴<a href="{% url 'api:gasoline' %}">こちら</a>(積極的にいれてくれ!!!)</p>
+    <p>給油履歴<a href="{% url 'status:gasoline' %}">こちら</a>(積極的にいれてくれ!!!)</p>
     <h1>予約一覧</h1>
     <ul>
       {% if messages %}
@@ -33,7 +33,7 @@
       {% for reservation in reservations %}
       <li>
         {{ reservation.start_time|date:"m/d (D)" }}{{ reservation.start_time|time:"G:i" }} ~ {{ reservation.end_time|date:"m/d (D)" }}{{ reservation.end_time|time:"G:i" }} 予約したひと:{{ reservation.user }}
-        <form method="post" action="{% url 'api:delete_reservation' reservation.id %}" style="display:inline;">
+        <form method="post" action="{% url 'status:delete_reservation' reservation.id %}" style="display:inline;">
           {% csrf_token %}
           <input type="password" name="password" placeholder="パスワード" required>
           <button type="submit">削除</button>

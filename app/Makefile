@@ -54,3 +54,25 @@ remove-none:
 .PHONY: exec
 exec:
 	docker compose exec api bash
+
+.PHONY: test
+test:
+	docker compose exec api pytest --cov=./ --cov-report term-missing:skip-covered
+
+.PHONY: black
+black:
+	docker compose exec api black .
+
+.PHONY: isort
+isort:
+	docker compose exec api isort .
+
+.PHONY: flake8
+flake8:
+	docker compose exec api flake8 .
+
+.PHONY: lint
+lint:
+	@make black
+	@make isort
+	@make flake8

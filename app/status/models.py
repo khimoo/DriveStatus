@@ -1,6 +1,6 @@
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
-from django.core.exceptions import ValidationError
 
 
 class Status(models.Model):
@@ -25,15 +25,20 @@ class Reservation(models.Model):
         # 予約が被っているかどうか
         overlapping_reservations = Reservation.objects.filter(
             start_time__lt=self.end_time,  # 終了時間が他の予約の開始時間より前
-            end_time__gt=self.start_time  # 開始時間が他の予約の終了時間より後
-        ).exclude(pk=self.pk)  # 自分自身のレコードは除外する
+            end_time__gt=self.start_time,  # 開始時間が他の予約の終了時間より後
+        ).exclude(
+            pk=self.pk
+        )  # 自分自身のレコードは除外する
 
         if overlapping_reservations.exists():
-            raise ValidationError('この時間帯はすでに予約されています。他の時間を選択してください。')
+            raise ValidationError(
+                "この時間帯はすでに予約されています。他の時間を選択してください。"
+            )
 
     def save(self, *args, **kwargs):
         self.clean()  # 保存前にバリデーションを実行する
         super().save(*args, **kwargs)
+
 
 # ガソリンをいれてくれた人の名前と金額を記録するモデル
 
