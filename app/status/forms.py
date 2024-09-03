@@ -42,7 +42,9 @@ class GasolineForm(forms.Form):
         label="金額",
         widget=forms.NumberInput(attrs={"class": "form-control"}),
     )
+    # blank=True
     comment = forms.CharField(
         label="備考",
+        required=False,
         widget=forms.Textarea(attrs={"class": "form-control"}),
     )

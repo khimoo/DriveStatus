@@ -1,3 +1,4 @@
+import requests
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
@@ -47,7 +48,7 @@ class Gasoline(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100)
     price = models.IntegerField()
-    comment = models.TextField(blank=True, null=True)
+    comment = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -104,3 +105,34 @@ class Announcement(models.Model):
 
     def __str__(self):
         return f"{self.title}"
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        try:
+            discord_info = DiscordIntegration.objects.first()
+            if discord_info.is_discord_notification_enabled:
+                if discord_info.is_announcement_notification_enabled:
+                    url = f"https://discordapp.com/api/channels/{discord_info.discord_channel_id}/messages"
+                    headers = {
+                        "Content-Type": "application/json",
+                        "Authorization": f"Bot {discord_info.discord_bot_token}",
+                    }
+                    data = {
+                        "content": f"掲示板が更新されました\n{self.title}\n{self.content}"
+                    }
+                    requests.post(url, headers=headers, json=data)
+        except:
+            pass
+
+
+class DiscordIntegration(models.Model):
+    id = models.AutoField(primary_key=True)
+    discord_bot_token = models.CharField(max_length=100)
+    discord_channel_id = models.CharField(max_length=100)
+    is_discord_notification_enabled = models.BooleanField(default=False)
+    is_status_notification_enabled = models.BooleanField(default=False)
+    is_reservation_notification_enabled = models.BooleanField(default=False)
+    is_gasoline_notification_enabled = models.BooleanField(default=False)
+    is_announcement_notification_enabled = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
