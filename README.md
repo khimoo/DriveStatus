@@ -20,4 +20,4 @@
     - 掲示板の投稿
 - password認証
   - 共有のパスワードを設定する
-![](https://github.com/khimoo/DriveStatus/blob/main/drivestatus.gif)
+![sample](drivestatus.gif)
