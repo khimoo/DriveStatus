@@ -9,7 +9,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .forms import ReservationForm
+from .forms import GasolineForm, ReservationForm
 from .models import Gasoline, InsuranceContributer, Reservation, Status
 
 
@@ -117,18 +117,19 @@ class DeleteReservationView(LoginRequiredMixin, View):
 
 
 # ガソリンを入れたことを報告するビュー
-class GasolineView(LoginRequiredMixin, TemplateView):
+class GasolineView(LoginRequiredMixin, FormView):
     template_name = "gasoline.html"
+    form_class = GasolineForm
 
-    def get(self, request, *args, **kwargs):
-        context = self.get_context_data(**kwargs)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
         context["gasolines"] = Gasoline.objects.all().order_by("-created_at")
-        return self.render_to_response(context)
+        return context
 
     def post(self, request, *args, **kwargs):
-        user = request.POST.get("user")
+        name = request.POST.get("name")
         price = request.POST.get("price")
         comment = request.POST.get("comment")
-        gasoline = Gasoline(name=user, price=price, comment=comment)
+        gasoline = Gasoline(name=name, price=price, comment=comment)
         gasoline.save()
         return redirect("status:home")
