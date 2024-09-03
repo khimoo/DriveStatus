@@ -30,3 +30,21 @@ class ReservationForm(forms.Form):
             format="%Y-%m-%d %H:%M",
         ),
     )
+
+
+class GasolineForm(forms.Form):
+    name = forms.CharField(
+        label="給油した人",
+        max_length=100,
+        widget=forms.TextInput(attrs={"class": "form-control"}),
+    )
+    price = forms.IntegerField(
+        label="金額",
+        widget=forms.NumberInput(attrs={"class": "form-control"}),
+    )
+    # blank=True
+    comment = forms.CharField(
+        label="備考",
+        required=False,
+        widget=forms.Textarea(attrs={"class": "form-control"}),
+    )

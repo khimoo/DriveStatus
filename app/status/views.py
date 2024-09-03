@@ -1,5 +1,6 @@
 import json
 
+import requests
 from django.contrib import messages as message
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404, redirect, render
@@ -9,8 +10,9 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .forms import ReservationForm
-from .models import Gasoline, InsuranceContributer, Reservation, Status
+from .forms import GasolineForm, ReservationForm
+from .models import (Announcement, DiscordIntegration, Gasoline,
+                     InsuranceContributer, Reservation, Status)
 
 
 # getにはStatusのis_usingをcontextに入れて、予約があるかどうかもcontextに入れる
@@ -36,6 +38,23 @@ class CarStatusAPIView(LoginRequiredMixin, APIView):
         status_car = Status.objects.first()
         status_car.is_using = not status_car.is_using
         status_car.save()
+        # Discordに通知
+        try:
+            discord_info = DiscordIntegration.objects.first()
+            if discord_info.is_discord_notification_enabled:
+                if discord_info.is_status_notification_enabled:
+                    url = f"https://discordapp.com/api/channels/{discord_info.discord_channel_id}/messages"
+                    headers = {
+                        "Content-Type": "application/json",
+                        "Authorization": f"Bot {discord_info.discord_bot_token}",
+                    }
+                    if status_car.is_using:
+                        data = {"content": "使用中に変更されました"}
+                    else:
+                        data = {"content": "使用可能に変更されました"}
+                    requests.post(url, headers=headers, json=data)
+        except:
+            pass
         return Response(status.HTTP_200_OK)
 
 
@@ -54,6 +73,8 @@ class CarStatusView(LoginRequiredMixin, TemplateView):
         context["insurance_contributers"] = json.dumps(contributers_data)
 
         context["gasolines"] = Gasoline.objects.all().order_by("-created_at")
+
+        context["announcements"] = Announcement.objects.all().order_by("-created_at")
         return context
 
 
@@ -97,6 +118,28 @@ class ReservationView(LoginRequiredMixin, FormView):
                 start_time=form.cleaned_data["start_date"],
                 end_time=form.cleaned_data["end_date"],
             )
+            # Discordに通知
+            try:
+                discord_info = DiscordIntegration.objects.first()
+                if discord_info.is_discord_notification_enabled:
+                    if discord_info.is_reservation_notification_enabled:
+                        url = f"https://discordapp.com/api/channels/{discord_info.discord_channel_id}/messages"
+                        headers = {
+                            "Content-Type": "application/json",
+                            "Authorization": f"Bot {discord_info.discord_bot_token}",
+                        }
+                        start_date_jp = form.cleaned_data["start_date"].strftime(
+                            "%Y年%m月%d日 %H時%M分"
+                        )
+                        end_date_jp = form.cleaned_data["end_date"].strftime(
+                            "%Y年%m月%d日 %H時%M分"
+                        )
+                        data = {
+                            "content": f"{form.cleaned_data['name']}さんが{start_date_jp}から{end_date_jp}まで予約しました"
+                        }
+                        requests.post(url, headers=headers, json=data)
+            except:
+                pass
             return redirect("status:home")
         else:
             return render(request, self.template_name, {"form": form})
@@ -117,18 +160,37 @@ class DeleteReservationView(LoginRequiredMixin, View):
 
 
 # ガソリンを入れたことを報告するビュー
-class GasolineView(LoginRequiredMixin, TemplateView):
+class GasolineView(LoginRequiredMixin, FormView):
     template_name = "gasoline.html"
+    form_class = GasolineForm
 
-    def get(self, request, *args, **kwargs):
-        context = self.get_context_data(**kwargs)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
         context["gasolines"] = Gasoline.objects.all().order_by("-created_at")
-        return self.render_to_response(context)
+        return context
 
     def post(self, request, *args, **kwargs):
-        user = request.POST.get("user")
-        price = request.POST.get("price")
-        comment = request.POST.get("comment")
-        gasoline = Gasoline(name=user, price=price, comment=comment)
-        gasoline.save()
+        form = GasolineForm(data=request.POST)
+        if form.is_valid():
+            Gasoline.objects.create(
+                name=form.cleaned_data["name"],
+                price=form.cleaned_data["price"],
+                comment=form.cleaned_data["comment"],
+            )
+            # Discordに通知
+            try:
+                discord_info = DiscordIntegration.objects.first()
+                if discord_info.is_discord_notification_enabled:
+                    if discord_info.is_gasoline_notification_enabled:
+                        url = f"https://discordapp.com/api/channels/{discord_info.discord_channel_id}/messages"
+                        headers = {
+                            "Content-Type": "application/json",
+                            "Authorization": f"Bot {discord_info.discord_bot_token}",
+                        }
+                        data = {
+                            "content": f"{form.cleaned_data['name']}さんが{form.cleaned_data['price']}円出費しました"
+                        }
+                        requests.post(url, headers=headers, json=data)
+            except:
+                pass
         return redirect("status:home")
