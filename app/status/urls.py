@@ -6,7 +6,7 @@ app_name = "status"
 
 urlpatterns = [
     path("", views.CarStatusView.as_view(), name="home"),
-    path("toggle/", views.StatusToggleView.as_view(), name="toggle"),
+    path("status/", views.CarStatusAPIView.as_view(), name="statusAPI"),
     path("reservation/", views.ReservationView.as_view(), name="reservation"),
     path(
         "delete_reservation/<int:pk>/",

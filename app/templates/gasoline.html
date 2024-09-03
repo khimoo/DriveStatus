@@ -13,27 +13,31 @@
 
         <button type="submit">Submit</button>
     </form>
-
-    <h2>給油履歴</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>給油した人</th>
-                <th>金額</th>
-                <th>備考</th>
-                <th>記入日</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for gasoline in gasolines %}
-                <tr>
-                    <td>{{ gasoline.name }}</td>
-                    <td>{{ gasoline.price }}</td>
-                    <td>{{ gasoline.comment }}</td>
-                    <td>{{ gasoline.created_at }}</td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    <a href="{% url 'status:home' %}">Home</a>
+<h1 style="display:inline;">給油履歴</h1>
+<div style="overflow-x: auto;">
+  <table style="min-width: 600px; width: 60%;">
+    <thead>
+      <tr>
+        <th>給油した人</th>
+        <th>金額</th>
+        <th>備考</th>
+        <th>記入日</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for gasoline in gasolines %}
+      <tr>
+        <td>{{ gasoline.name }}</td>
+        <td>{{ gasoline.price }}</td>
+        <td>
+          <div style="max-width: 300px; overflow-wrap: break-word;">
+          {{ gasoline.comment }}
+          </div>
+        </td>
+        <td>{{ gasoline.created_at }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
 {% endblock %}
