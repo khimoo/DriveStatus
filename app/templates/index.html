@@ -1,37 +1,67 @@
 {% extends "base.html" %}
 
 {% block content %}
-<a href="{% url 'status:toggle' %}">切り替え</a>
-<a href="javascript:location.reload(true);">更新</a>
-<a href="{% url 'status:reservation' %}">予約</a>
-<p>車を使ってるときは使用中にしておいてください</p>
+<p>車を使ってるときは使用中にしておいてください(文字をタップして切り替え)</p>
 <p>給油履歴<a href="{% url 'status:gasoline' %}">こちら</a>(積極的にいれてくれ!!!)</p>
 <h1 style="display:inline;">予約一覧</h1>
-{% if is_reserved %}
-<h1 style="display:inline;">
-  <span style="margin-left: 5px;">(予約者あり)</span>
-</h1>
-{% endif %}
-<ul>
-  {% if messages %}
-  {% for message in messages %}
-  <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-  {% endfor %}
-  {% endif %}
-  {% for reservation in reservations %}
-  <li>
-    {{ reservation.start_time|date:"m/d (D)" }}{{ reservation.start_time|time:"G:i" }} ~ {{ reservation.end_time|date:"m/d (D)" }}{{ reservation.end_time|time:"G:i" }} 予約したひと:{{ reservation.user }}
-    <form method="post" action="{% url 'status:delete_reservation' reservation.id %}" style="display:inline;">
-      {% csrf_token %}
-      <input type="password" name="password" placeholder="パスワード" required>
-      <button type="submit">削除</button>
-    </form>
-  </li>
-  {% endfor %}
-</ul>
+<div style="overflow-x: auto;">
+  <table style="min-width: 600px; width: 30%;">
+    <thead>
+      <tr>
+        <th>開始時間</th>
+        <th>終了時間</th>
+        <th>予約した人</th>
+        <th>passwordを入力して削除</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for reservation in reservations %}
+      <tr>
+        <td>{{ reservation.start_time|date:"m/d (D)" }}{{ reservation.start_time|time:"G:i" }}</td>
+        <td>{{ reservation.end_time|date:"m/d (D)" }}{{ reservation.end_time|time:"G:i" }}</td>
+        <td>{{ reservation.name }}</td>
+        <td>
+          <form method="post" action="{% url 'status:delete_reservation' reservation.id %}">
+            {% csrf_token %}
+            <input type="password" name="password" placeholder="パスワード" required>
+            <button type="submit">削除</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+<h1 style="display:inline;">給油履歴</h1>
+<div style="overflow-x: auto;">
+  <table style="min-width: 500px; width: 30%;">
+    <thead>
+      <tr>
+        <th>給油した人</th>
+        <th>金額</th>
+        <th>備考</th>
+        <th>記入日</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for gasoline in gasolines %}
+      <tr>
+        <td>{{ gasoline.name }}</td>
+        <td>{{ gasoline.price }}</td>
+        <td>
+            <div style="max-width: 100px; overflow: hidden; text-overflow: ellipsis;">
+            {{ gasoline.comment }}
+            </div>
+        </td>
+        <td>{{ gasoline.created_at }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
 <h1>保険料支払い状況</h1>
 <div>
-  <canvas id="myChart"></canvas>
+<canvas id="myChart"></canvas>
 </div>
 <p>2024年6月分から月12270円</p>
 <p>支払い状況が更新されてないときは連絡してください</p>

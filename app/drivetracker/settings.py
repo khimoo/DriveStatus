@@ -39,6 +39,7 @@ ALLOWED_HOSTS = env.list("ALLOWED_HOSTS")
 INSTALLED_APPS = [
     "status",
     "login",
+    "rest_framework",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",

@@ -5,9 +5,38 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.generic import FormView, TemplateView, View
+from rest_framework import status
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from .forms import ReservationForm
 from .models import Gasoline, InsuranceContributer, Reservation, Status
+
+
+# getにはStatusのis_usingをcontextに入れて、予約があるかどうかもcontextに入れる
+# postにはStatusのis_usingを反転させる
+class CarStatusAPIView(LoginRequiredMixin, APIView):
+    def get(self, request, *args, **kwargs):
+        # reservationsには現在予約が入っているか否かが入っている
+        now = timezone.now()
+        reservations = Reservation.objects.filter(
+            start_time__lte=now, end_time__gte=now
+        )
+        if reservations.exists():
+            is_reserved = True
+        else:
+            is_reserved = False
+        context = {
+            "is_using": Status.objects.first().is_using,
+            "is_reserved": is_reserved,
+        }
+        return Response(context)
+
+    def post(self, request, *args, **kwargs):
+        status_car = Status.objects.first()
+        status_car.is_using = not status_car.is_using
+        status_car.save()
+        return Response(status.HTTP_200_OK)
 
 
 class CarStatusView(LoginRequiredMixin, TemplateView):
@@ -16,7 +45,6 @@ class CarStatusView(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
-        context["is_using"] = Status.objects.first().is_using
         # 現在時刻がend_timeを過ぎている予約を削除
         Reservation.objects.filter(end_time__lt=timezone.now()).delete()
         context["reservations"] = Reservation.objects.all()
@@ -25,22 +53,8 @@ class CarStatusView(LoginRequiredMixin, TemplateView):
         contributers_data = list(insurance_contributers.values("name", "total_paid"))
         context["insurance_contributers"] = json.dumps(contributers_data)
 
-        # 現在がReservation.start_timeより後、Reservation.end_timeより前の時間ならcontext['is_reserved']をTrueにする
-        for reservation in context["reservations"]:
-            if reservation.start_time < timezone.now() < reservation.end_time:
-                context["is_reserved"] = True
-                break
-        else:
-            context["is_reserved"] = False
+        context["gasolines"] = Gasoline.objects.all().order_by("-created_at")
         return context
-
-
-class StatusToggleView(LoginRequiredMixin, View):
-    def get(self, request, *args, **kwargs):
-        status = Status.objects.first()
-        status.is_using = not status.is_using
-        status.save()
-        return redirect("status:home")
 
 
 class ReservationView(LoginRequiredMixin, FormView):

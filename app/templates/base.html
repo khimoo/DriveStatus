@@ -7,24 +7,111 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    {% block extra_head %}{% endblock %}
     <title>home</title>
-  </head>
-  <body>
-    <div style="display: flex; justify-content: space-between; align-items: center;">
-      <div style="display: flex; align-items: center;">
-        <p style="margin: 0; padding-right: 10px;">ただ今</p>
-        {% if is_using %}
-        <h1 style="margin: 0;">使用中</h1>
-        {% else %}
-        <h1 style="margin: 0;">使用可能</h1>
-        {% endif %}
-      </div>
-      <div>
-        <a href="{% url 'status:home' %}">ホーム</a>
-      </div>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+    }
+
+    .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .left-section {
+      display: flex;
+      align-items: center;
+      gap: 10px; /* アイテム間のスペース */
+      a {
+        color: black;
+      }
+    }
+
+    .right-section {
+      display: flex;
+      align-items: center;
+      gap: 10px; /* アイテム間のスペース */
+    }
+
+    /* スマホ対応のメディアクエリ */
+    @media (max-width: 600px) {
+      .right-section {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+      }
+    }
+  </style>
+    {% block extra_head %}{% endblock %}
+</head>
+
+<body>
+  <div class="container">
+    <div class="left-section">
+      <h1><a href="javascript:toggleStatus()" id="status"></a></h1>
+      <h1><a href="{% url 'status:reservation' %}" id="reservation-status"></a></h1>
     </div>
-    <br>
-    {% block content %}{% endblock %}
-  </body>
+    <div class="right-section">
+      <a href="{% url 'status:home' %}">ホーム</a>
+      <a href="{% url 'status:reservation' %}">予約</a>
+      <a href="{% url 'status:gasoline' %}">給油等</a>
+      <a href="javascript:fetchStatusData();updateStatus()">更新</a>
+    </div>
+  </div>
+  <br>
+  {% block content %}{% endblock %}
+</body>
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      fetchStatusData();
+
+      // Fetch the current status data
+      function fetchStatusData() {
+        fetch("{% url 'status:statusAPI' %}")
+          .then(response => response.json())
+          .then(data => {
+            updateStatus(data.is_using, data.is_reserved);
+          })
+          .catch(error => console.error('Error fetching status:', error));
+      }
+
+      // Update the displayed status and reservation information
+      function updateStatus(isUsing, isReserved) {
+        const statusElement = document.getElementById("status");
+        const reservationElement = document.getElementById("reservation-status");
+
+        if (isUsing) {
+          statusElement.innerText = "使用中";
+        } else {
+          statusElement.innerText = "使用可能";
+        }
+
+        if (isReserved) {
+          reservationElement.innerText = "(予約者あり)";
+        } else {
+          reservationElement.innerText = " ";
+        }
+      }
+
+      // Toggle status with a POST request
+      function toggleStatus() {
+        fetch("{% url 'status:statusAPI' %}", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": "{{ csrf_token }}"
+          },
+          body: JSON.stringify({})
+        })
+        .then(fetchStatusData)
+          .catch(error => console.error('Error toggling status:', error));
+      }
+
+      // onclickで呼び出せるように明示
+      window.updateStatus = updateStatus;
+      window.fetchStatusData = fetchStatusData;
+      window.toggleStatus = toggleStatus;
+    });
+  </script>
 </html>
