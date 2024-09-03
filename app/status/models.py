@@ -93,3 +93,14 @@ class InsurancePayment(models.Model):
         self.name.total_paid -= self.price
         self.name.save()
         super().delete(*args, **kwargs)
+
+
+class Announcement(models.Model):
+    id = models.AutoField(primary_key=True)
+    title = models.CharField(max_length=100)
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.title}"

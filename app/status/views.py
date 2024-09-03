@@ -10,7 +10,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .forms import GasolineForm, ReservationForm
-from .models import Gasoline, InsuranceContributer, Reservation, Status
+from .models import (Announcement, Gasoline, InsuranceContributer, Reservation,
+                     Status)
 
 
 # getにはStatusのis_usingをcontextに入れて、予約があるかどうかもcontextに入れる
@@ -54,6 +55,8 @@ class CarStatusView(LoginRequiredMixin, TemplateView):
         context["insurance_contributers"] = json.dumps(contributers_data)
 
         context["gasolines"] = Gasoline.objects.all().order_by("-created_at")
+
+        context["announcements"] = Announcement.objects.all().order_by("-created_at")
         return context
 
 

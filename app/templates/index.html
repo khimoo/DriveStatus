@@ -97,5 +97,7 @@
   });
 </script>
 <h1>掲示板</h1>
-<p>html形式で掲示事項を入力してください</p>
+{% for announcement in announcements %}
+  <p>{{ announcement.content }}</p>
+{% endfor %}
 {% endblock %}
