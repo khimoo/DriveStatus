@@ -20,6 +20,8 @@
     - 掲示板の投稿
 - password認証
   - 共有のパスワードを設定する
+
+## 参考gif
 ![drivestatus1](https://github.com/user-attachments/assets/5401ed18-af90-4edf-8a3f-fb0a59adf64f)
 ![drivestatus2](https://github.com/user-attachments/assets/ba69b22a-0ec2-41ca-95a6-229fc8416dd0)
 ![drivestatus3](https://github.com/user-attachments/assets/06170996-8546-491f-900d-1d146d8f5471)
