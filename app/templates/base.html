@@ -16,7 +16,7 @@
     .container {
       display: flex;
       justify-content: space-between;
-      align-items: center;
+      align-items: flex-end;
     }
 
     .left-section {
@@ -25,6 +25,9 @@
       gap: 10px; /* アイテム間のスペース */
       a {
         color: black;
+      }
+      h1 {
+        margin-bottom: 0;
       }
     }
 
@@ -38,6 +41,7 @@
     @media (max-width: 600px) {
       .right-section {
         flex-direction: column;
+        flex-wrap: wrap-reverse;
         align-items: flex-start;
         gap: 5px;
       }
@@ -59,7 +63,6 @@
       <a href="javascript:fetchStatusData();updateStatus()">更新</a>
     </div>
   </div>
-  <br>
   {% block content %}{% endblock %}
 </body>
   <script>
