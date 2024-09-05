@@ -74,6 +74,9 @@
   const contributers = JSON.parse('{{ insurance_contributers|safe }}');
   console.log(contributers);
 
+  //支払いが多い順に並び替え
+  contributers.sort((a, b) => b.total_paid - a.total_paid);
+
   const labels = contributers.map(item => item.name); // nameフィールドをラベルに使用
   const data = contributers.map(item => item.total_paid); // total_paidフィールドをデータに使用
 
@@ -101,6 +104,6 @@
 </script>
 <h1>掲示板</h1>
 {% for announcement in announcements %}
-  <p>{{ announcement.content }}</p>
+<p>{{ announcement.content|linebreaksbr }}</p>
 {% endfor %}
 {% endblock %}

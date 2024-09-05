@@ -4,7 +4,7 @@
 {% load tz %}
 
 <html lang="ja">
-  <head>
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>home</title>
@@ -23,12 +23,15 @@
       display: flex;
       align-items: center;
       gap: 10px; /* アイテム間のスペース */
-      a {
-        color: black;
-      }
-      h1 {
-        margin-bottom: 0;
-      }
+    }
+
+    .left-section a {
+      color: black;
+      text-decoration: none;
+    }
+
+    .left-section h1 {
+      margin-bottom: 0;
     }
 
     .right-section {
@@ -49,7 +52,6 @@
   </style>
     {% block extra_head %}{% endblock %}
 </head>
-
 <body>
   <div class="container">
     <div class="left-section">
